@@ -127,7 +127,7 @@ export default store
 
 ```
 
-# connection between React and Redux `index.js`
+# step-8 connection between React and Redux `index.js`
 
 ```
 import React from "react";
@@ -144,4 +144,33 @@ ReactDOM.render(
     </Provider>
 
     ,document.getElementById('root'))
+```
+
+# step-9 access `store` in the `component`
+
+```
+import React from 'react'
+import { useSelector } from 'react-redux'
+
+const ProductComponent = () => {
+    const products = useSelector(state => state.allProduct.product)
+    const {id,title} = products[0]
+    console.log(products)
+    return (
+        <div className='four column wide'>
+        <div className='ui link cards'>
+        <div className='card'>
+        <div className='image' ></div>
+        <div className='content'>
+        <div className='header'>{title}</div>
+        </div>
+        </div>
+
+        </div>
+        </div>
+    )
+}
+
+export default ProductComponent
+
 ```
