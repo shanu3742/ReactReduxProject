@@ -1,70 +1,147 @@
-# Getting Started with Create React App
+# Getting Started with Create React and Redux App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+# step-1 `install react app `
 
-In the project directory, you can run:
+- `npx create-react-app my-app`
 
-### `npm start`
+# step-2 `install redux and react-redux`
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- `npm i redux react-redux`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+# step-3 Redux Folder Stracture
 
-### `npm test`
+## Create Two Folder inside src folder
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Redux (file related to redux belongs to this folder)
+- Containers (`our all component belongs to this folder`)
 
-### `npm run build`
+# Redux Folder Stracture `create three folder and one file `
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## folder name
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Action : `what to do`
+- Reducer :`How to do`
+- constants : `Contains all the action type`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## file name
 
-### `npm run eject`
+- store.js : `we store all state in it`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+# step 4 constants
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- action-type.js
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+export const ActionType = {
+    Set_PRODUCTS:'Set_PRODUCTS',
+    SELECTED_PRODUCTS:'SELECTED_PRODUCTS',
+    REMOVE_SELECTED_PRODUCTS:'REMOVE_SELECTED_PRODUCTS'
+}
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# step 5 Action
 
-## Learn More
+- Action has one index.js file where we define what to do
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+import { ActionType } from "../constants/action-type"
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+export const setProduct = (product) => {
+    return {
+        type:ActionType.Set_PRODUCTS,
+        payload:product
+    }
 
-### Code Splitting
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+export const selectedProduct = (product) => {
+    return {
+        type:ActionType.SELECTED_PRODUCTS,
+        payload:product
+    }
+}
 
-### Analyzing the Bundle Size
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+# step 6 `Reducer`
 
-### Making a Progressive Web App
+## in Reducer we can we use single file index.js but it is not good things to do .mostly in Reducer we define atleast two file one for acumaliting what to do in a single index.js and others are for how to do.for example-
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- index.js-acumalator
+- upDownCounter.js
+- mulCounter.js
 
-### Advanced Configuration
+### `in this project we use productReducer.js`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```
+import { ActionType } from "../constants/action-type";
 
-### Deployment
+// we define initial state
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+const initialState = {
+    product :[{
+        id:'1',
+        title:'shanu',
+        category:'programmer'
 
-### `npm run build` fails to minify
+    }]
+}
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export const productReducer = (state =initialState,{type,payload}) => {
+    //we distracture action {type,payload}= action
+switch (type) {
+    case ActionType.Set_PRODUCTS:
+        return state
+        break;
+
+    default: return state
+        break;
+}
+
+}
+```
+
+### now combine all reducer in index.js in `Reducer Folder `
+
+```
+import { combineReducers } from "redux";
+import { productReducer } from "./productReducer";
+
+const rootReducer = combineReducers({
+   allProduct: productReducer,})
+
+export default rootReducer
+```
+
+# step-7 `now crerate store (store.js)`
+
+```
+import { createStore } from "redux";
+import rootReducer from "./Reducers";
+
+const store = createStore(rootReducer,{},window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+
+export default store
+
+```
+
+# connection between React and Redux `index.js`
+
+```
+import React from "react";
+import ReactDOM from "react-dom";
+import App from './App'
+import {Provider} from 'react-redux'
+import store from './Redux/store'
+
+
+
+ReactDOM.render(
+    <Provider store={store}>
+    <App />
+    </Provider>
+
+    ,document.getElementById('root'))
+```
