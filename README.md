@@ -174,3 +174,103 @@ const ProductComponent = () => {
 export default ProductComponent
 
 ```
+
+# step-10 now we have to store api data what we get from server
+
+## step 1 fetch and `dispatch` data to `store`
+
+```
+import React from 'react'
+
+import { useDispatch } from 'react-redux';
+import { setProduct } from '../Redux/Action';
+
+import ProductComponent from './ProductComponent'
+
+const ProductListing = () => {
+
+    const dispatch = useDispatch()
+
+
+    //now we get api data from server and now we have to store this data in store
+
+// console.log(data)
+const api ='https://fakestoreapi.com/products'
+
+const FetchData = async() => {
+try{
+const result = await fetch(api)
+const jresult = await result.json()
+dispatch(setProduct(jresult))
+
+       }catch(error){
+           console.log(error)
+       }
+
+}
+React.useEffect(() => {
+FetchData()
+},[])
+return (
+
+<div className='ui grid container'>
+<ProductComponent />
+</div>
+)
+}
+
+export default ProductListing
+```
+
+## step 2: update the `reducer ` code with `payload`
+
+```
+import { ActionType } from "../constants/action-type";
+
+const initialState = {
+product :[]
+}
+
+export const productReducer = (state =initialState,{type,payload}) => {
+//we distracture action {type,payload}= action
+switch (type) {
+case ActionType.Set_PRODUCTS:
+return {...state,products:payload}
+break;
+
+    default: return state
+        break;
+
+}
+
+}
+```
+
+## step 3 use the `updated store` in our project
+
+```
+import React from 'react'
+import { useSelector } from 'react-redux'
+
+const ProductComponent = () => {
+    const products = useSelector(state => state.allProduct)
+    // const {id,title} = products[0]
+    console.log(products)
+    return (
+        <div className='four column wide'>
+        <div className='ui link cards'>
+        <div className='card'>
+        <div className='image' ></div>
+        <div className='content'>
+        <div className='header'>shanu</div>
+        </div>
+        </div>
+
+        </div>
+        </div>
+    )
+}
+
+export default ProductComponent
+
+```
