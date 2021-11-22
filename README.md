@@ -274,3 +274,318 @@ const ProductComponent = () => {
 export default ProductComponent
 
 ```
+
+# step 11 now how to use `Redux` to store the `api data` for selected `item`
+
+## `change file`
+
+- ProductComponent.js
+- ProductDetails.js
+- in Reducer
+  - index.js
+  - ProductReducer.js
+
+### changed in `ProductComponent.js`
+
+```
+import React from 'react'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+
+const ProductComponent = () => {
+    const products = useSelector(state => state.allProduct.products)
+    // const {id,title} = products[0]
+    console.log(products)
+    return (
+
+       <>
+       {products.map(el => {
+           return(
+            <div   key={el.id}>
+            <Link to={`/product/${el.id}`}>
+            <div className='ui link cards'>
+            <div className='card'>
+            <div className='image' >
+            <img src={el.image} alt={el.title}/>
+            </div>
+            <div className='content'>
+            <div className='header'>{el.title}</div>
+            <div className='meta price'>$ {el.price}</div>
+            <div className='meta'>{el.category}</div>
+            </div>
+            </div>
+
+            </div>
+            </Link>
+
+            </div>
+           )
+       })}
+       </>
+    )
+}
+
+export default ProductComponent
+
+```
+
+### change file `ProductDetails.js`
+
+```
+import React from 'react'
+import { useParams } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux';
+import { selectedProduct } from '../Redux/Action';
+
+const ProductDetails = () => {
+    const productId = useParams()
+    // useParams is used to catch the id from website link
+    console.log(productId.productId)
+
+    const product= useSelector((state) => state)
+
+   console.log(product)
+
+    const dispatch = useDispatch()
+
+    const api =`https://fakestoreapi.com/products/${productId.productId}`
+
+   const  FetchData = React.useCallback(async() => {
+    try{
+        const result = await fetch(api)
+        const jresult = await result.json()
+
+        dispatch(selectedProduct(jresult))
+
+
+    }catch(error){
+        console.log(error)
+    }
+},[api,dispatch])
+   React.useEffect(() => {
+       if(productId && productId !==''){
+        FetchData()
+       }
+
+   },[FetchData,productId])
+
+
+    return (
+        <div>
+        ProductDetails
+        </div>
+    )
+}
+
+export default ProductDetails
+
+
+```
+
+### change file in Reducers folder is `index.js` and `productReducer.js`
+
+### updated `index.js` file
+
+```
+import { combineReducers } from "redux";
+import { productReducer } from "./productReducer";
+import { selectProductReducer } from "./productReducer";
+
+const rootReducer = combineReducers({
+   allProduct: productReducer,
+product:selectProductReducer})
+
+export default rootReducer
+
+```
+
+### updated `productReducer.js` file
+
+```
+import { ActionType } from "../constants/action-type";
+
+const initialState = {
+    product :[]
+}
+
+export const productReducer = (state =initialState,{type,payload}) => {
+    //we distracture action {type,payload}= action
+switch (type) {
+    case ActionType.Set_PRODUCTS:
+        return {...state,products:payload}
+        break;
+
+    default: return state
+        break;
+}
+
+
+
+}
+
+export const selectProductReducer = (state={},{type,payload}) => {
+    switch (type) {
+        case ActionType.SELECTED_PRODUCTS:return{...state,...payload}
+
+            break;
+
+        default: return state
+            break;
+    }
+}
+```
+
+# Cleanup the app
+
+## updated index.js in action folder
+
+```
+import { ActionType } from "../constants/action-type"
+
+export const setProduct = (product) => {
+    return {
+        type:ActionType.Set_PRODUCTS,
+        payload:product
+    }
+
+}
+
+export const selectedProduct = (product) => {
+    return {
+        type:ActionType.SELECTED_PRODUCTS,
+        payload:product
+    }
+}
+
+export const removeSelectedProduct = () => {
+    return {
+        type:ActionType.REMOVE_SELECTED_PRODUCTS,
+
+    }
+}
+
+```
+
+## in reducer update `productReducer.js`
+
+```
+
+import { ActionType } from "../constants/action-type";
+
+const initialState = {
+    product :[]
+}
+
+export const productReducer = (state =initialState,{type,payload}) => {
+    //we distracture action {type,payload}= action
+switch (type) {
+    case ActionType.Set_PRODUCTS:
+        return {...state,products:payload}
+        break;
+
+        case ActionType.REMOVE_SELECTED_PRODUCTS:
+            return {}
+            break;
+
+
+    default: return state
+        break;
+}
+
+
+
+}
+
+export const selectProductReducer = (state={},{type,payload}) => {
+    switch (type) {
+        case ActionType.SELECTED_PRODUCTS:return{...state,...payload}
+
+            break;
+
+        default: return state
+            break;
+    }
+}
+```
+
+### updated `ProductDetails.js`
+
+```
+import React from 'react'
+import { useParams } from 'react-router'
+import { useDispatch, useSelector } from 'react-redux';
+import { selectedProduct ,removeSelectedProduct} from '../Redux/Action';
+
+const ProductDetails = () => {
+    const [isLoading,setIsLoading]= React.useState(false)
+    const productId = useParams()
+    // useParams is used to catch the id from website link
+    console.log(productId.productId)
+
+    const product= useSelector((state) => state)
+
+   console.log(product)
+
+    const dispatch = useDispatch()
+
+    const api =`https://fakestoreapi.com/products/${productId.productId}`
+
+   const  FetchData = React.useCallback(async() => {
+    setIsLoading(true)
+    try{
+
+        const result = await fetch(api)
+        const jresult = await result.json()
+
+        dispatch(selectedProduct(jresult))
+         setIsLoading(false)
+
+    }catch(error){
+        console.log(error)
+        setIsLoading(false)
+    }
+},[api,dispatch])
+   React.useEffect(() => {
+       if(productId && productId !==''){
+        FetchData()
+       }
+       return () => {
+           dispatch(removeSelectedProduct())
+       }
+
+   },[FetchData,productId,dispatch])
+
+
+    return (
+     <>
+   {
+       isLoading?<h1>Loading...</h1>:<>
+
+
+
+               <div class="ui three column grid">
+               <div class="column">
+                 <div class="ui segment">
+                 <div className='image'>
+
+                 <img src={product.product.image} alt={product.product.title}/>
+                 </div>
+
+                 </div>
+               </div>
+
+
+             </div>
+
+
+      </>
+
+   }
+     </>
+
+    )
+}
+
+export default ProductDetails
+
+```

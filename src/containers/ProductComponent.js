@@ -1,5 +1,25 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+
+
+// <div class="ui three column grid">
+//   <div class="column">
+//     <div class="ui segment">
+//       <img>
+//     </div>
+//   </div>
+//   <div class="column">
+//     <div class="ui segment">
+//       <img>
+//     </div>
+//   </div>
+//   <div class="column">
+//     <div class="ui segment">
+//       <img>
+//     </div>
+//   </div>
+// </div>
 
 const ProductComponent = () => {
     const products = useSelector(state => state.allProduct.products)
@@ -10,8 +30,9 @@ const ProductComponent = () => {
        <>
        {products.map(el => {
            return(
-            <div   key={el.id}>
-            <div className='ui link cards'>
+            <div className="ui three column grid"   key={el.id}>
+            <Link to={`/product/${el.id}`}>
+            <div className='ui link cards column'>
             <div className='card'>
             <div className='image' >
             <img src={el.image} alt={el.title}/>
@@ -24,6 +45,8 @@ const ProductComponent = () => {
             </div>
             
             </div>
+            </Link>
+           
             </div>
            )
        })}
